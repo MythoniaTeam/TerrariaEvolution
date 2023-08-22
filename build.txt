@@ -1,0 +1,3 @@
+displayName = Terraria: Evolution
+author = Akizuki Miu
+version = 0.1
