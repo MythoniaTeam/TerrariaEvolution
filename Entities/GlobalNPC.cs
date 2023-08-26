@@ -35,10 +35,16 @@ namespace Evolution.Entities
 
             MDebug.Print($"{npc.TypeName}: PosTemp = {npc.position}", Color.Yellow);
 
+            rotationTempAfterAI = npc.rotation;
+
         }
 
         Vector2 velTemp;
         Vector2 posTemp;
+        double frameTemp;
+        float rotationTempPreAI;
+        float rotationTempAfterAI;
+        float rotationDeltaTemp;
         bool hasTemp = false;
 
         Color color;
@@ -47,111 +53,126 @@ namespace Evolution.Entities
         bool update;
         bool updated;
 
+        float rot;
+        int dir;
+
         public override bool PreAI(NPC npc)
         {
+            //if (npc.spriteDirection != 1)
+
+            MDebug.Print($"({npc.frameCounter})", Color.Yellow);
+            //return true;
+
+
+            npc.position -= npc.velocity * (1 - timeScale);
+            
+            if (update) velTemp = npc.velocity;
+            else npc.velocity = velTemp;
+
+            if(npc.frameCounter != 0) npc.frameCounter = (npc.frameCounter - frameTemp) * timeScale;
+
             //DEBUG
             //timeScale = 0.1f;
             //return false;//true;
 
-            MDebug.Print($"PreAI", Color.Violet);
-            if (npc.type == NPCID.BaldZombie) return true;
 
-            
-            timeScale = 1f;
-            //timeScale *= 0.99f;
+
+            timeScale = 0.1f;
+
+
             c = (Main.GameUpdateCount - myUpdateCount >= 1 / timeScale) ? 1 : 0.5f;
 
-
-            //MDebug.Print($"{npc.TypeName}: {myUpdateCount}, {Main.GameUpdateCount}", Color.White * c);
-            MDebug.Print($"Vel: {npc.velocity.X / 16 , 6:0.00}, {npc.velocity.Y / 16 , 6:0.00} ({velTemp.X / 16 , 6:0.00}, {velTemp.Y / 16 , 6:0.00})", Color.White * c);
-            MDebug.Print($"Pos: {npc.position.X / 16 , 6:0.00}, {npc.position.Y / 16 , 6:0.00} ({posTemp.X / 16 , 6:0.00}, {posTemp.Y / 16 , 6:0.00}), HasTemp: {hasTemp}", Color.White * c);
-            //return true;
+            //npc.rotation += 10;
+            //if(npc.directionY != -1) 
+                //MDebug.Print($"Rotation: {npc.directionY}", Color.Yellow * c);
+            //MDebug.Print($"Pre: {npc.rotation / MathF.PI * 180, 8:0.0}, ({rotationTemp / MathF.PI * 180,8:0.0}), dr {rotationDeltaTemp / MathF.PI * 180,8:0.0}", Color.White * c);
+            
 
             //如果达到一定间隔，开始更新
             if (Main.GameUpdateCount - myUpdateCount >= 1 / timeScale)
             {
-                //MDebug.Print($"{npc.TypeName}: Vel = {velTemp}", Color.Green * c);
-                //npc.velocity = velTemp;
-                //velTemp = Vector2.Zero;
+                rotationTempPreAI = npc.rotation;
+                npc.rotation = rotationTempAfterAI;
 
-                //如果之前没有更新
-                if(update == false)
-                {
-                    //如果有 位置 速度 记录，将记录调出
-                    if(hasTemp)
-                    {
-                        MDebug.Print($"Vel = ({velTemp.X / 16, 6:0.00}, {velTemp.Y / 16, 6:0.00})", Color.SkyBlue * c);
-                        MDebug.Print($"Pos = ({posTemp.X / 16, 6:0.00}, {posTemp.Y / 16, 6:0.00})", Color.SkyBlue * c);
-
-                        npc.position = posTemp;
-                        npc.velocity = velTemp;
-                        hasTemp = false;
-                    }
-                    update = true;
-                }
-                
                 myUpdateCount += MathF.Ceiling((Main.GameUpdateCount - myUpdateCount) * timeScale) / timeScale;
-
+                update = true;
                 return true;
             }
             //否则不更新
             else
             {
-                //MDebug.Print($"{npc.TypeName}: Vel = 0", Color.Turquoise * c);
-                //npc.velocity = Vector2.Zero;
-                if(update == true)
-                {
-                    MDebug.Print($"Vel = ({npc.velocity.X / 16 , 6:0.00}, {npc.velocity.Y / 16 , 6:0.00})", Color.Pink * c);
-                    MDebug.Print($"Pos = ({npc.position.X / 16 , 6:0.00}, {npc.position.Y / 16 , 6:0.00})", Color.Pink * c);
-                    posTemp = npc.position;
-                    velTemp = npc.velocity;
-                    hasTemp = true;
-                    update = false;
-                }
-
-                //将速度设为0，将位置固定在记录的位置
-                if (hasTemp)
-                {
-                    npc.position = posTemp;
-                }
-                npc.velocity = Vector2.Zero;
-
+                update = false;
                 return false;
             } 
         }
 
+        Vector2 posTemp2;
+
+
+        public override void AI(NPC npc)
+        {
+            //rotationDeltaTemp = npc.rotation - rotationTemp;
+            //npc.rotation = rotationTemp;
+            rotationTempAfterAI = npc.rotation;
+        }
+
         public override void PostAI(NPC npc)
         {
-            MDebug.Print($"PostAI", Color.Violet);
-            MDebug.Print($"Vel: {npc.velocity.X / 16 , 6:0.00}, {npc.velocity.Y / 16 , 6:0.00} ({velTemp.X / 16 , 6:0.00}, {velTemp.Y / 16 , 6:0.00})", Color.White * c);
-            MDebug.Print($"Pos: {npc.position.X / 16 , 6:0.00}, {npc.position.Y / 16 , 6:0.00} ({posTemp.X / 16 , 6:0.00}, {posTemp.Y / 16 , 6:0.00}), HasTemp: {hasTemp}", Color.White * c);
+            MDebug.Print($"({npc.frameCounter})", Color.Yellow);
 
-            //DEBUG
-            //npc.position -= npc.velocity;
-            //npc.velocity = Vector2.Zero;
-            return;
+            //npc.ai[1] = 0;
 
-            npc.position -= npc.velocity * (1 - timeScale);
+            //return;
 
+            //npc.directionY = 1;
+            //npc.spriteDirection = 1;
 
+            //return;
 
-            if(update)
+            //MDebug.Print($"PostStart: {npc.rotation / MathF.PI * 180,8:0.0}, ({rotationTemp / MathF.PI * 180,8:0.0}), dr {rotationDeltaTemp / MathF.PI * 180,8:0.0}", Color.White * c);
+
+            if (update)
             {
-                npc.position -= npc.velocity * (1 - timeScale);
-                
+                rotationDeltaTemp = npc.rotation - rotationTempPreAI;
+                rotationDeltaTemp %= 2 * MathF.PI;
+                MDebug.Print($"  = {rotationDeltaTemp / MathF.PI * 180,8:0.0}", Color.Purple * c);
+
+                if (MathF.Abs(rotationDeltaTemp) > MathF.PI)
+                {
+                    MDebug.Print($"  = {rotationDeltaTemp / MathF.PI * 180,8:0.0}", Color.Purple * c);
+
+                    rotationDeltaTemp -= MathF.Sign(rotationDeltaTemp) * MathF.PI * 2;
+                    MDebug.Print($"  = {rotationDeltaTemp / MathF.PI * 180,8:0.0}", Color.Red * c);
+
+                }
+                npc.rotation = rotationTempPreAI;
             }
-            else
-            {
-                posTemp += velTemp * timeScale;
-            }
+            //MDebug.Print($"PostMid: {npc.rotation / MathF.PI * 180,8:0.0}, ({rotationTemp / MathF.PI * 180,8:0.0}), dr {rotationDeltaTemp / MathF.PI * 180,8:0.0}", Color.White * c);
+            npc.rotation += rotationDeltaTemp * timeScale;
 
-            //npc.position -= npc.velocity * (1 - timeScale);
+            frameTemp = npc.frameCounter;
+
+            //posTemp2 = npc.position;
+            //if(!updated) npc.position = posTemp2;
+
+            //if (npc.spriteDirection != dir)
+            //{
+            //    //MDebug.Print($"PostEnd: {npc.direction}, {npc.directionY} ({npc.spriteDirection})", Color.Yellow * c);
+            //    //MDebug.Print($"PostEnd: {npc.rotation / MathF.PI * 180 % 360,8:0.0}, ({rotationTemp / MathF.PI * 180 %360,8:0.0}), dr {rotationDeltaTemp / MathF.PI * 180,8:0.0}", Color.White * c);
+            //    updated = false;
+            //    //npc.velocity = Vector2.Zero;
+            //    posTemp2 = npc.position;
+
+            //}
+            //dir = npc.spriteDirection;
 
 
-            if (npc.type == NPCID.BaldZombie) return;
+            //npc.rotation = rot;
+            //rot += 1 * MathF.PI / 180;
 
+            //npc.spriteDirection = -1;
 
-            updated = update;
+            
         }
 
     }
